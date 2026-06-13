@@ -1,0 +1,40 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "api-key-placeholder"
+name = "Stylique Beauty OS"
+handle = "stylique-beauty"
+application_url = "https://stylique.ngrok.io"
+embedded = true
+
+[build]
+automatically_update_urls_on_dev = true
+dev_store_url = "stylique-test.myshopify.com"
+include_config_on_deploy = true
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_products,write_products,read_orders,read_customers"
+
+[auth]
+redirect_urls = [
+  "https://stylique.ngrok.io/api/auth/callback"
+]
+
+[webhooks]
+api_version = "2024-04"
+
+  [[webhooks.subscriptions]]
+  topics = [ "app/uninstalled" ]
+  uri = "/api/webhooks"
+
+  [[webhooks.subscriptions]]
+  topics = [ "products/create", "products/update", "products/delete" ]
+  uri = "/api/webhooks"
+
+[pos]
+embedded = false
+
+[app_proxy]
+url = "https://stylique.ngrok.io/api/storefront"
+subpath = "stylique"
+prefix = "apps"

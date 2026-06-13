@@ -1,0 +1,220 @@
+:root {
+  --stella-primary: var(--primary-color, #8b5cf6);
+  --stella-text-primary: #0f172a;
+  --stella-text-secondary: #64748b;
+  --stella-bg-glass: rgba(255, 255, 255, 0.85);
+  --stella-border-glass: rgba(255, 255, 255, 0.4);
+  --stella-shadow-glass: 0 24px 48px -12px rgba(0, 0, 0, 0.18);
+  --stella-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --stella-radius-lg: 1.5rem;
+  --stella-radius-md: 1rem;
+  --stella-radius-sm: 0.5rem;
+}
+
+.stella-widget-container {
+  position: fixed;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  right: calc(24px + env(safe-area-inset-right, 0px));
+  z-index: 2147483647;
+  font-family: var(--stella-font);
+  pointer-events: none; /* Let clicks pass through container */
+}
+
+.stella-widget-container * {
+  box-sizing: border-box;
+  pointer-events: auto; /* Re-enable for actual elements */
+}
+
+/* FAB Styling */
+.stella-fab {
+  background: var(--stella-primary);
+  color: white;
+  border: none;
+  border-radius: 9999px;
+  padding: 14px 28px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 10px 25px -5px rgba(139, 92, 246, 0.4);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+.stella-fab::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.stella-fab:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 20px 30px -5px rgba(139, 92, 246, 0.5);
+}
+
+.stella-fab:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.stella-fab-pulse {
+  animation: stellaPulse 2s infinite cubic-bezier(0.66, 0, 0, 1);
+  box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4);
+}
+
+/* Panel Styling (Glassmorphism) */
+.stella-panel {
+  background: var(--stella-bg-glass);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  border: 1px solid var(--stella-border-glass);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.4) inset, 0 24px 48px -12px rgba(0, 0, 0, 0.25);
+  border-radius: var(--stella-radius-lg);
+  width: 380px;
+  height: 650px;
+  max-height: calc(100vh - 100px - env(safe-area-inset-bottom, 0px) - env(safe-area-inset-top, 0px));
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform-origin: bottom right;
+  animation: stellaSlideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@media (max-width: 480px) {
+  .stella-panel {
+    width: calc(100vw - 32px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
+    height: calc(100vh - 120px - env(safe-area-inset-bottom, 0px) - env(safe-area-inset-top, 0px));
+    right: calc(16px + env(safe-area-inset-right, 0px));
+    bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+    position: fixed;
+    margin-bottom: 0;
+  }
+  .stella-widget-container {
+    right: calc(16px + env(safe-area-inset-right, 0px));
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Animations */
+@keyframes stellaSlideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes stellaMessageIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes stellaPulse {
+  to {
+    box-shadow: 0 0 0 20px rgba(139, 92, 246, 0);
+  }
+}
+
+/* Scrollbars */
+.stella-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.stella-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.stella-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.1);
+  border-radius: 10px;
+}
+.stella-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.2);
+}
+
+/* Chat Messages */
+.stella-msg {
+  animation: stellaMessageIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  padding: 12px 16px;
+  border-radius: var(--stella-radius-md);
+  max-width: 85%;
+  font-size: 14px;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.stella-msg-user {
+  background: var(--stella-primary);
+  color: white;
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.stella-msg-assistant {
+  background: #f1f5f9;
+  color: var(--stella-text-primary);
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+}
+
+/* Buttons */
+.stella-btn-primary {
+  background: linear-gradient(135deg, var(--stella-primary), #6366f1);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: var(--stella-radius-md);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  text-align: center;
+}
+.stella-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(99, 102, 241, 0.4);
+}
+.stella-btn-primary:active {
+  transform: translateY(0);
+}
+
+/* Carousel */
+.stella-carousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  gap: 12px;
+  padding-bottom: 8px;
+}
+
+.stella-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.stella-carousel-item {
+  scroll-snap-align: start;
+  flex: 0 0 140px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid var(--stella-border-glass);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}

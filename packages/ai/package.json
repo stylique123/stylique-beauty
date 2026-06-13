@@ -1,0 +1,14 @@
+{
+  "name": "@stylique/ai",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@stylique/types": "*",
+    "@google/generative-ai": "^0.24.0"
+  }
+}

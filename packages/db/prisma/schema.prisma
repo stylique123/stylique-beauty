@@ -1,0 +1,396 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Shopify session storage ──────────────────────────────────────────────────
+// Required by @shopify/shopify-app-session-storage-prisma. Shape is fixed.
+
+model Session {
+  id            String    @id
+  shop          String
+  state         String
+  isOnline      Boolean   @default(false)
+  scope         String?
+  expires       DateTime?
+  accessToken   String
+  userId        BigInt?
+  firstName     String?
+  lastName      String?
+  email         String?
+  accountOwner  Boolean   @default(false)
+  locale        String?
+  collaborator  Boolean?  @default(false)
+  emailVerified Boolean?  @default(false)
+}
+
+// ─── Tenancy & billing ────────────────────────────────────────────────────────
+
+model Shop {
+  id            String    @id @default(cuid())
+  shopifyDomain String    @unique
+  // SECURITY: Shopify Admin API token.
+  accessToken   String
+  scopes        String
+  installedAt   DateTime  @default(now())
+  uninstalledAt DateTime?
+
+  plan             Plan?
+  brandPersonaJson Json?
+  products         Product[]
+  events           AnalyticsEvent[]
+  savedRoutines    SavedRoutine[]
+  shopperSessions  ShopperSession[]
+  catalogGaps      CatalogGap[]
+  recommendations  Recommendation[]
+  usageCounters    UsageCounter[]
+  outcomeEvents    OutcomeEvent[]
+  hesitationEvents HesitationEvent[]
+  dailyBriefs      DailyBrief[]
+  interactions     InteractionEvent[]
+
+  @@index([shopifyDomain])
+}
+
+model Plan {
+  id     String @id @default(cuid())
+  shopId String @unique
+  shop   Shop   @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  tier PlanTier @default(STARTER)
+
+  planFeaturesJson Json?
+
+  renewsAt  DateTime?
+  updatedAt DateTime  @updatedAt
+}
+
+enum PlanTier {
+  STARTER
+  GROWTH
+  ULTIMATE
+}
+
+// ─── Product catalog (mirror of Shopify) ─────────────────────────────────────
+
+model Product {
+  id           String   @id @default(cuid())
+  shopId       String
+  shop         Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  shopifyId    String
+  handle       String
+  title        String
+  productType  String?
+  vendor       String?
+  tags         String[]
+  category     String?
+
+  ingredientsINCIString String?
+  featuredImageUrl String?
+  priceMinCents Int?
+  lifespanDays  Int?      // How many days before expected restock
+  isVegan       Boolean?
+  isCrueltyFree Boolean?
+
+  variants ProductVariant[]
+  images   ProductImage[]
+  events   AnalyticsEvent[]
+
+  updatedAt DateTime @updatedAt
+
+  @@unique([shopId, shopifyId])
+  @@index([shopId, category])
+}
+
+model ProductVariant {
+  id         String  @id @default(cuid())
+  productId  String
+  product    Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  shopifyId  String
+  sku        String?
+  size       String?
+  color      String?
+  hexColor   String?
+  priceCents Int?
+
+  availableForSale  Boolean?
+  inventoryQuantity Int?
+  inventorySyncedAt DateTime?
+
+  @@unique([productId, shopifyId])
+  @@index([productId, color])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  shopifyId String?
+  url       String
+  position  Int     @default(0)
+
+  @@index([productId])
+}
+
+// ─── Shopper session ──────────────────────────────────────────────────────────
+
+model ShopperSession {
+  id            String  @id @default(cuid())
+  sessionId     String  @unique
+  shopifyDomain String
+
+  shop Shop @relation(fields: [shopifyDomain], references: [shopifyDomain], onDelete: Cascade)
+
+  shopifyCustomerId String?
+
+  skinTypeBeauty    String?   
+  skinConcernsJson  Json?     
+  skinDepth         String?   
+  skinUndertone     String?   
+  skinHex           String?   
+  skinAnalyzedAt    DateTime? 
+  routinePreference String?   
+
+  budgetMax             Float?
+  colorSeason           String?   
+  shadeRange            String?   
+  skinSensitivitiesJson String?   
+  profileVersion        Int       @default(1)
+  profileUpdatedAt      DateTime?
+
+  skinRoutineSavedAt     DateTime?
+  savedBeautyRoutineJson Json?
+
+  email            String?
+  displayName      String?
+  marketingOptIn   Boolean   @default(false)
+  accountClaimedAt DateTime?
+
+  emailVerifyToken    String?
+  emailVerifyExpiry   DateTime?
+  emailVerified       Boolean   @default(false)
+  emailVerifyAttempts Int       @default(0)
+  emailVerifyLockedAt DateTime?
+
+  chatHistoryJson Json?
+
+  tasteVectorJson Json?
+  tasteComputedAt DateTime?
+  signalCount     Int       @default(0)
+
+  events           AnalyticsEvent[]
+  savedRoutines    SavedRoutine[]
+  outcomeEvents    OutcomeEvent[]
+  hesitationEvents HesitationEvent[]
+  interactions     InteractionEvent[]
+
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+
+  @@index([shopifyDomain, shopifyCustomerId])
+  @@index([shopifyDomain])
+  @@index([email])
+  @@index([shopifyDomain, skinDepth, skinUndertone])
+}
+
+// ─── Analytics events ─────────────────────────────────────────────────────────
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  shopId    String
+  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  shopperId String?
+  shopper   ShopperSession? @relation(fields: [shopperId], references: [id], onDelete: SetNull)
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  name    BeautyEventName
+  payload Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([shopId, name, createdAt])
+  @@index([shopId, productId, createdAt])
+}
+
+enum BeautyEventName {
+  BEAUTY_SKIN_PROFILE_CAPTURED
+  BEAUTY_SHADE_MATCHED
+  BEAUTY_ROUTINE_BUILT
+  BEAUTY_ROUTINE_ADD_ALL
+  BEAUTY_ROUTINE_ADDED_TO_CART
+  BEAUTY_SHADE_GAP_LOGGED
+  BEAUTY_INGREDIENT_CONCERN
+  BEAUTY_REPLENISHMENT_TRIGGERED
+  CART_CONFIRMED
+  CART_CANCELLED
+  CHAT_OPENED
+  CHAT_CLOSED
+  CHAT_MESSAGE_SENT
+  CHAT_REPLY_RECEIVED
+  SIGNUP_OFFERED
+  SIGNUP_CLAIMED
+  SIGNUP_DISMISSED
+  ACCOUNT_CLAIMED
+}
+
+// ─── Interaction logs (Deep AI Memory) ────────────────────────────────────────
+
+model InteractionEvent {
+  id            String          @id @default(cuid())
+  shopId        String
+  shopperId     String
+  type          String          // "hover", "chat", "rejection", "preference_state"
+  targetId      String?         // Product ID, Feature ID, etc.
+  payloadJson   Json?           // Additional details (e.g., chat message text, why rejected)
+  
+  createdAt     DateTime        @default(now())
+
+  shop          Shop            @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  session       ShopperSession  @relation(fields: [shopperId], references: [id], onDelete: Cascade)
+
+  @@index([shopId, shopperId, type])
+  @@index([shopId, createdAt])
+}
+
+// ─── Saved routine ────────────────────────────────────────────────────────────
+
+model SavedRoutine {
+  id            String @id @default(cuid())
+  shopId        String
+  shopifyDomain String
+  shopperId     String
+
+  shop    Shop           @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  shopper ShopperSession @relation(fields: [shopperId], references: [id], onDelete: Cascade)
+
+  productIds  String[] 
+  stepOrder   Json
+  routineType String?
+  status String @default("active")
+  miraSummary String?
+
+  lastReplenishmentCheckAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([shopId, shopperId, status])
+  @@index([shopId, routineType, createdAt])
+}
+
+// ─── Catalog gap intelligence (merchant moat) ────────────────────────────────
+
+model CatalogGap {
+  id           String   @id @default(cuid())
+  shopId       String
+  undertone    String   
+  depth        String   
+  requestCount Int      @default(1)
+  requestTerms String   
+  severity     String   @default("medium") 
+  weekStart    DateTime 
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  shop         Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@unique([shopId, undertone, depth, weekStart])
+  @@index([shopId, severity])
+  @@index([shopId, weekStart])
+}
+
+// ─── Merchant recommendations ─────────────────────────────────────────────────
+
+model Recommendation {
+  id            String    @id @default(cuid())
+  shopId        String
+  type          String    
+  title         String
+  description   String
+  impactScore   Float     @default(0.5) 
+  confidence    Float     @default(0.5) 
+  actionType    String?   
+  actionPayload String?   
+  status        String    @default("active") 
+  expiresAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  shop          Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@index([shopId, status])
+  @@index([shopId, type, status])
+}
+
+// ─── Usage counters (entitlement quota enforcement) ───────────────────────────
+
+model UsageCounter {
+  id        String   @id @default(cuid())
+  shopId    String
+  metric    String   
+  period    String   
+  count     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@unique([shopId, metric, period])
+  @@index([shopId, metric])
+}
+
+// ─── Outcome events (closes the learning loop) ───────────────────────────────
+
+model OutcomeEvent {
+  id            String          @id @default(cuid())
+  shopId        String
+  shopperId     String?
+  eventType     String          
+  referenceId   String?         
+  referenceType String?         
+  outcomeScore  Float?          
+  metadata      String?         
+  createdAt     DateTime        @default(now())
+  shop          Shop            @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  session       ShopperSession? @relation(fields: [shopperId], references: [id])
+
+  @@index([shopId, eventType])
+  @@index([shopId, referenceType, referenceId])
+  @@index([shopId, createdAt])
+}
+
+// ─── Hesitation events ────────────────────────────────────────────────────────
+
+model HesitationEvent {
+  id              String          @id @default(cuid())
+  shopId          String
+  shopperId       String?
+  hesitationType  String          
+  context         String?         
+  resolved        Boolean         @default(false)
+  resolvedBy      String?         
+  createdAt       DateTime        @default(now())
+  shop            Shop            @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  session         ShopperSession? @relation(fields: [shopperId], references: [id])
+
+  @@index([shopId, hesitationType])
+  @@index([shopId, resolved])
+}
+
+// ─── Daily brief ──────────────────────────────────────────────────────────────
+
+model DailyBrief {
+  id        String    @id @default(cuid())
+  shopId    String
+  briefDate DateTime  
+  content   String    
+  priority  String    @default("normal") 
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+  shop      Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@unique([shopId, briefDate])
+  @@index([shopId, createdAt])
+}

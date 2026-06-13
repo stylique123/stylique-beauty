@@ -1,0 +1,42 @@
+{
+  "name": "@stylique/shopify-backend",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint --max-warnings 0",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.0",
+    "@shopify/shopify-api": "^13.0.0",
+    "@shopify/shopify-app-session-storage-prisma": "^9.0.0",
+    "@stylique/ai": "*",
+    "@stylique/beauty-engine": "*",
+    "@stylique/types": "*",
+    "@stylique/ui": "*",
+    "clsx": "^2.1.1",
+    "framer-motion": "^11.15.0",
+    "lucide-react": "^0.511.0",
+    "next": "16.2.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "tailwind-merge": "^2.6.0",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "*",
+    "@repo/typescript-config": "*",
+    "@tailwindcss/postcss": "^4.1.8",
+    "@types/node": "^22.15.3",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "@types/uuid": "^10.0.0",
+    "eslint": "^9.39.1",
+    "tailwindcss": "^4.1.8",
+    "typescript": "5.9.2"
+  }
+}

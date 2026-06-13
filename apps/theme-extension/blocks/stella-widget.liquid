@@ -1,0 +1,30 @@
+<div 
+  id="stylique-stella-root" 
+  data-shop-domain="{{ shop.domain }}" 
+  data-brand-id="{{ block.settings.brand_id }}"
+  data-primary-color="{{ block.settings.primary_color }}"
+></div>
+
+<script src="{{ 'stella-widget.bundle.js' | asset_url }}" defer="defer"></script>
+
+{% schema %}
+{
+  "name": "t:name",
+  "target": "body",
+  "stylesheet": "stella-widget.bundle.css",
+  "settings": [
+    {
+      "type": "text",
+      "id": "brand_id",
+      "label": "Stylique Brand ID",
+      "info": "Find this in your Stylique Admin Dashboard."
+    },
+    {
+      "type": "color",
+      "id": "primary_color",
+      "label": "Primary Accent Color",
+      "default": "#8B5CF6"
+    }
+  ]
+}
+{% endschema %}
