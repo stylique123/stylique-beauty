@@ -32,9 +32,9 @@ export async function GET(request: Request) {
     });
 
     // 3. Synthesize "Competitor Radar"
-    const competitorMentions = interactions.filter(i => i.type === 'competitor_mention');
+    const competitorMentions = interactions.filter((i: any) => i.type === 'competitor_mention');
     const competitorCounts: Record<string, number> = {};
-    competitorMentions.forEach(mention => {
+    competitorMentions.forEach((mention: any) => {
       const payload = mention.payloadJson as any;
       if (payload && payload.competitor) {
         competitorCounts[payload.competitor] = (competitorCounts[payload.competitor] || 0) + 1;
@@ -47,10 +47,10 @@ export async function GET(request: Request) {
     })).sort((a, b) => b.mentions - a.mentions);
 
     // 4. Synthesize "Lost Revenue" (Hesitations)
-    const hesitations = interactions.filter(i => i.type === 'hesitation');
+    const hesitations = interactions.filter((i: any) => i.type === 'hesitation');
     let lostToPrice = 0;
     let lostToShade = 0;
-    hesitations.forEach(h => {
+    hesitations.forEach((h: any) => {
       const payload = h.payloadJson as any;
       if (payload?.reason === 'price') lostToPrice++;
       if (payload?.reason === 'shade_match') lostToShade++;

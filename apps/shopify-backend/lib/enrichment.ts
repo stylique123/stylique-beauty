@@ -21,7 +21,7 @@ Description: ${product.handle} // We don't fetch full body_html in sync yet, ass
 Type: ${product.productType}
 Tags: ${product.tags.join(', ')}
 Variants:
-${product.variants.map(v => `- SKU: ${v.sku}, Color Option: ${v.color}`).join('\n')}
+${product.variants.map((v: any) => `- SKU: ${v.sku}, Color Option: ${v.color}`).join('\n')}
 `;
 
     console.log(`[Enrichment] Requesting Deep AI Extraction for ${product.title}...`);
@@ -42,7 +42,7 @@ ${product.variants.map(v => `- SKU: ${v.sku}, Color Option: ${v.color}`).join('\
     if (intelligence.shades && intelligence.shades.length > 0) {
       for (const shade of intelligence.shades) {
         // Find variant matching by shade name
-        const variant = product.variants.find(v => 
+        const variant = product.variants.find((v: any) => 
           v.color && v.color.toLowerCase() === shade.name.toLowerCase()
         );
 
