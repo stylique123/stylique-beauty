@@ -65,39 +65,63 @@ export function SkinAnalysisAndTryOn() {
   return (
     <div style={{
       position: "fixed", inset: 0, zIndex: 10000,
-      background: "rgba(0,0,0,0.9)", backdropFilter: "blur(12px)",
+      background: "rgba(9, 9, 11, 0.95)", backdropFilter: "blur(24px)",
       display: "flex", flexDirection: "column",
     }}>
       {/* Header */}
       <div style={{ padding: "1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h2 className="text-heading-3" style={{ color: "white" }}>Stylique AR Try-On</h2>
-        <button onClick={() => setActiveDialog('none')} style={{ background: "transparent", border: "none", color: "white", fontSize: "1.5rem", cursor: "pointer" }}>✕</button>
+        <h2 className="text-heading-3" style={{ color: "var(--color-text-primary)" }}>Stylique AR Try-On</h2>
+        <button 
+          onClick={() => setActiveDialog('none')} 
+          className="btn-ghost"
+          style={{ width: "40px", height: "40px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
       </div>
 
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", maxWidth: "500px", margin: "0 auto", width: "100%", padding: "0 1rem" }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", maxWidth: "500px", margin: "0 auto", width: "100%", padding: "0 1.5rem 1.5rem" }}>
         
         {/* Visual Area */}
-        <div style={{ flex: 1, position: "relative", borderRadius: "2rem", overflow: "hidden", background: "#111" }}>
+        <div style={{ 
+          flex: 1, position: "relative", borderRadius: "2rem", overflow: "hidden", 
+          background: "var(--color-surface-overlay)",
+          boxShadow: "0 24px 48px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.05)"
+        }}>
           
           {step === 'camera' && (
-            <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "2rem" }}>
-              <div style={{ width: "200px", height: "280px", border: "2px dashed rgba(255,255,255,0.5)", borderRadius: "50%" }} />
-              <button className="btn-primary" onClick={handleScan}>Enable Camera to Scan</button>
+            <div className="animate-fade-in" style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "2rem" }}>
+              <div style={{ 
+                width: "240px", height: "320px", 
+                border: "2px dashed rgba(255,255,255,0.3)", 
+                borderRadius: "120px",
+                position: "relative"
+              }}>
+                <div className="animate-pulse-glow" style={{ position: "absolute", inset: "-4px", borderRadius: "120px", pointerEvents: "none" }} />
+              </div>
+              <button className="btn-primary" onClick={handleScan} style={{ padding: "1rem 2.5rem", fontSize: "1rem" }}>
+                Enable Camera to Scan
+              </button>
             </div>
           )}
 
           {step === 'scanning' && (
-            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <div className="animate-pulse" style={{ color: "white", textAlign: "center" }}>
-                <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>📸</div>
-                <p>Checking lighting...</p>
-                <p>Analyzing undertones...</p>
+            <div className="animate-fade-in" style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1.5rem", color: "var(--color-text-primary)" }}>
+                <div className="animate-spin-slow" style={{ width: "64px", height: "64px", borderRadius: "50%", border: "4px solid rgba(139,92,246,0.3)", borderTopColor: "var(--color-violet-500)" }} />
+                <div style={{ textAlign: "center" }}>
+                  <h3 className="text-heading-3" style={{ marginBottom: "0.5rem" }}>Scanning Profile</h3>
+                  <p style={{ color: "var(--color-text-secondary)", fontSize: "0.9375rem" }}>Analyzing depth and undertones...</p>
+                </div>
               </div>
             </div>
           )}
 
           {step === 'results' && activeShade && profile.skinToneDepth && profile.undertone && (
-            <div style={{ position: "absolute", inset: 0, padding: "1rem", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div className="animate-fade-in" style={{ position: "absolute", inset: 0, padding: "1rem", display: "flex", alignItems: "center", justifyContent: "center" }}>
                <AIShadeSimulator 
                  skinDepth={profile.skinToneDepth}
                  undertone={profile.undertone}
@@ -107,8 +131,14 @@ export function SkinAnalysisAndTryOn() {
                />
                
                {/* Before/After Toggle Overlay (Mock) */}
-               <div style={{ position: "absolute", bottom: "1rem", left: "1rem", background: "rgba(0,0,0,0.5)", padding: "0.5rem 1rem", borderRadius: "1rem", color: "white", fontSize: "0.75rem", backdropFilter: "blur(4px)" }}>
-                 Live AR View
+               <div style={{ 
+                 position: "absolute", bottom: "1.5rem", left: "1.5rem", 
+                 background: "rgba(9, 9, 11, 0.6)", padding: "0.5rem 1rem", 
+                 borderRadius: "2rem", color: "var(--color-text-primary)", 
+                 fontSize: "0.8125rem", fontWeight: 600, backdropFilter: "blur(12px)",
+                 border: "1px solid rgba(255,255,255,0.1)"
+               }}>
+                 <span style={{ color: "var(--color-emerald-500)", marginRight: "6px" }}>●</span> Live AR View
                </div>
             </div>
           )}
@@ -116,66 +146,74 @@ export function SkinAnalysisAndTryOn() {
 
         {/* Controls Area */}
         {step === 'results' && matchResult && (
-          <div className="animate-fade-in-up" style={{ padding: "1.5rem 0", background: "transparent" }}>
+          <div className="animate-fade-in-up delay-100" style={{ paddingTop: "2rem", background: "transparent" }}>
             
             {/* AI Reasoning */}
             {matchInfo && (
-              <div style={{ background: "rgba(255,255,255,0.1)", padding: "1rem", borderRadius: "1rem", marginBottom: "1rem", color: "white" }}>
-                <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "0.5rem" }}>
-                  <span>✨</span>
-                  <span style={{ fontWeight: 600, fontSize: "0.875rem" }}>Stylique AI</span>
+              <div style={{ 
+                background: "rgba(139,92,246,0.1)", 
+                border: "1px solid rgba(139,92,246,0.2)",
+                padding: "1.25rem", borderRadius: "var(--radius-lg)", 
+                marginBottom: "1.5rem" 
+              }}>
+                <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "0.75rem" }}>
+                  <span style={{ color: "var(--color-violet-400)" }}>✦</span>
+                  <span style={{ fontWeight: 600, fontSize: "0.875rem", color: "var(--color-violet-400)" }}>Stylique AI Match</span>
                 </div>
-                <p style={{ fontSize: "0.875rem", opacity: 0.9, lineHeight: 1.5, margin: 0 }}>
+                <p style={{ fontSize: "0.9375rem", color: "var(--color-text-primary)", lineHeight: 1.6, margin: 0 }}>
                   {matchInfo.reasoning}
                 </p>
-                <button onClick={handleAskAdvisor} style={{ background: "transparent", border: "none", color: "var(--color-violet-400)", padding: 0, fontSize: "0.8125rem", marginTop: "0.5rem", cursor: "pointer", textDecoration: "underline" }}>
-                  Ask Stella for styling advice
+                <button onClick={handleAskAdvisor} style={{ background: "transparent", border: "none", color: "var(--color-violet-400)", padding: 0, fontSize: "0.875rem", marginTop: "0.75rem", cursor: "pointer", fontWeight: 500 }}>
+                  Ask Stella for styling advice →
                 </button>
               </div>
             )}
 
             {/* Shade Carousel */}
-            <div style={{ display: "flex", gap: "0.75rem", overflowX: "auto", paddingBottom: "1rem", scrollbarWidth: "none" }}>
+            <div style={{ display: "flex", gap: "1rem", overflowX: "auto", paddingBottom: "1.5rem", scrollbarWidth: "none" }}>
               {matchResult.matches.map(match => (
                 <button
                   key={match.shade.id}
                   onClick={() => setActiveShadeId(match.shade.id)}
                   style={{
                     flexShrink: 0,
-                    width: "72px",
-                    display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem",
-                    background: "transparent", border: "none", cursor: "pointer"
+                    width: "80px",
+                    display: "flex", flexDirection: "column", alignItems: "center", gap: "0.75rem",
+                    background: "transparent", border: "none", cursor: "pointer",
+                    padding: 0
                   }}
                 >
                   <div style={{
-                    width: "48px", height: "48px", borderRadius: "50%",
+                    width: "56px", height: "56px", borderRadius: "50%",
                     background: match.hexColor,
-                    border: activeShadeId === match.shade.id ? "3px solid white" : "1px solid rgba(255,255,255,0.3)",
-                    boxShadow: activeShadeId === match.shade.id ? "0 0 16px rgba(255,255,255,0.3)" : "none",
+                    border: activeShadeId === match.shade.id ? "3px solid var(--color-text-primary)" : "2px solid rgba(255,255,255,0.1)",
+                    boxShadow: activeShadeId === match.shade.id ? "0 0 20px rgba(255,255,255,0.2)" : "none",
                     transform: activeShadeId === match.shade.id ? "scale(1.1)" : "scale(1)",
-                    transition: "all 0.2s ease"
+                    transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)"
                   }} />
-                  <span style={{ color: "white", fontSize: "0.7rem", textAlign: "center", opacity: activeShadeId === match.shade.id ? 1 : 0.6 }}>
+                  <span style={{ color: "var(--color-text-primary)", fontSize: "0.8125rem", textAlign: "center", opacity: activeShadeId === match.shade.id ? 1 : 0.6, fontWeight: activeShadeId === match.shade.id ? 600 : 400 }}>
                     {match.shade.name}
                   </span>
                   {match.matchType === 'best' && (
-                    <span style={{ background: "#22c55e", color: "black", padding: "2px 6px", borderRadius: "4px", fontSize: "0.6rem", fontWeight: 700 }}>BEST</span>
+                    <span style={{ background: "var(--gradient-brand)", color: "white", padding: "3px 8px", borderRadius: "1rem", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.05em" }}>BEST</span>
                   )}
                 </button>
               ))}
             </div>
 
             {/* Action Bar */}
-            <div style={{ display: "flex", gap: "1rem", marginTop: "0.5rem" }}>
+            <div style={{ display: "flex", gap: "1rem" }}>
               <button 
-                style={{ flex: 1, padding: "1rem", background: "rgba(255,255,255,0.1)", color: "white", border: "none", borderRadius: "var(--radius-md)", fontWeight: 600, cursor: "pointer" }}
+                className="btn-secondary"
+                style={{ flex: 1, padding: "1.25rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}
                 onClick={() => LearningEngine.logPreference(profile.id, 'save_shade', activeShadeId!)}
               >
-                ♡ Save
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                Save
               </button>
               <button 
                 className="btn-primary"
-                style={{ flex: 2, padding: "1rem", fontSize: "1rem" }}
+                style={{ flex: 2, padding: "1.25rem", fontSize: "1rem" }}
                 onClick={handleAddToCart}
               >
                 Add {activeShade?.name} to Cart

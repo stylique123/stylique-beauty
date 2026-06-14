@@ -18,9 +18,13 @@ export async function POST(request: NextRequest) {
     const shopId = profile?.brandId;
 
     if (shopId) {
-      const usage = await checkAndIncrementUsage(shopId);
-      if (!usage.allowed) {
-        return NextResponse.json({ reply: "Our styling service is currently unavailable. (Brand usage limits exceeded).", action: null, stage: "understand_intent" });
+      try {
+        const usage = await checkAndIncrementUsage(shopId);
+        if (!usage.allowed) {
+          return NextResponse.json({ reply: "Our styling service is currently unavailable. (Brand usage limits exceeded).", action: null, stage: "understand_intent" });
+        }
+      } catch (e) {
+        console.warn("DB not available for usage check:", e);
       }
 
       // Circuit Breaker: Max 20 messages per session to prevent API bankruptcy
@@ -42,52 +46,60 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      // 1. Intelligence Loop: Log basic interaction
-      await prisma.interactionEvent.create({
-        data: {
-          shopId: shopId,
-          shopperId: shopperId,
-          type: "chat",
-          payloadJson: { message, isAnonymous: !profile?.shopperId } as any
-        }
-      });
+      try {
+        // 1. Intelligence Loop: Log basic interaction
+        await prisma.interactionEvent.create({
+          data: {
+            shopId: shopId,
+            shopperId: shopperId,
+            type: "chat",
+            payloadJson: { message, isAnonymous: !profile?.shopperId } as any
+          }
+        });
 
-      // 2. Intelligence Loop: Detect Competitor Mentions
-      const messageLower = message.toLowerCase();
-      const competitors = ['fenty', 'nars', 'rare beauty', 'charlotte tilbury', 'glossier'];
-      for (const comp of competitors) {
-        if (messageLower.includes(comp)) {
-          await prisma.interactionEvent.create({
-            data: {
-              shopId: shopId,
-              shopperId: shopperId,
-              type: "competitor_mention",
-              payloadJson: { competitor: comp, context: message } as any
-            }
-          });
+        // 2. Intelligence Loop: Detect Competitor Mentions
+        const messageLower = message.toLowerCase();
+        const competitors = ['fenty', 'nars', 'rare beauty', 'charlotte tilbury', 'glossier'];
+        for (const comp of competitors) {
+          if (messageLower.includes(comp)) {
+            await prisma.interactionEvent.create({
+              data: {
+                shopId: shopId,
+                shopperId: shopperId,
+                type: "competitor_mention",
+                payloadJson: { competitor: comp, context: message } as any
+              }
+            });
+          }
         }
-      }
 
-      // 3. Intelligence Loop: Detect Hesitation / Lost Sale Risk
-      if (messageLower.includes('too expensive') || messageLower.includes('not my shade')) {
-         await prisma.interactionEvent.create({
-            data: {
-              shopId: shopId,
-              shopperId: shopperId,
-              type: "hesitation",
-              payloadJson: { reason: messageLower.includes('expensive') ? 'price' : 'shade_match', context: message } as any
-            }
-          });
+        // 3. Intelligence Loop: Detect Hesitation / Lost Sale Risk
+        if (messageLower.includes('too expensive') || messageLower.includes('not my shade')) {
+           await prisma.interactionEvent.create({
+              data: {
+                shopId: shopId,
+                shopperId: shopperId,
+                type: "hesitation",
+                payloadJson: { reason: messageLower.includes('expensive') ? 'price' : 'shade_match', context: message } as any
+              }
+            });
+        }
+      } catch (e) {
+        console.warn("DB not available for logging interactions:", e);
       }
     }
 
     let pastInteractions: any[] = [];
     if (shopId) {
-      pastInteractions = await prisma.interactionEvent.findMany({
-        where: { shopId, shopperId },
-        orderBy: { createdAt: 'desc' },
-        take: 10
-      });
+      try {
+        pastInteractions = await prisma.interactionEvent.findMany({
+          where: { shopId, shopperId },
+          orderBy: { createdAt: 'desc' },
+          take: 10
+        });
+      } catch (e) {
+        console.warn("DB not available for fetching past interactions:", e);
+      }
     }
 
     const ctx = {
@@ -108,15 +120,19 @@ export async function POST(request: NextRequest) {
       provider = new GeminiAIProvider(geminiKey);
     } else {
       if (shopId) {
-        // Log the silent failure to the database so the Super Admin / Merchant knows
-        await prisma.interactionEvent.create({
-          data: {
-            shopId: shopId,
-            shopperId: shopperId,
-            type: "system_alert",
-            payloadJson: { issue: "Gemini API key missing or invalid. Falling back to Mock AI.", level: "warning" } as any
-          }
-        });
+        try {
+          // Log the silent failure to the database so the Super Admin / Merchant knows
+          await prisma.interactionEvent.create({
+            data: {
+              shopId: shopId,
+              shopperId: shopperId,
+              type: "system_alert",
+              payloadJson: { issue: "Gemini API key missing or invalid. Falling back to Mock AI.", level: "warning" } as any
+            }
+          });
+        } catch (e) {
+          console.warn("DB not available for system alert:", e);
+        }
       }
       provider = new MockAIProvider();
     }
@@ -143,7 +159,41 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ reply, action, stage: decision.stage });
     }
 
-    return NextResponse.json({ reply: "Gemini integration active.", action: null });
+    try {
+      const { DEMO_PRODUCTS } = await import("@stylique/beauty-engine");
+      const fullCtx = {
+        sessionId,
+        brandId: shopId || "demo-brand",
+        shopperId,
+        profile,
+        faceAnalysis,
+        messages: previousMessages || [],
+        currentGoal: goal || null,
+        catalogueProducts: DEMO_PRODUCTS
+      };
+
+      let fullReply = "";
+      const stream = provider.chatStream(fullCtx as any, message);
+      for await (const chunk of stream) {
+        fullReply += chunk;
+      }
+
+      let action = null;
+      const lowerReply = fullReply.toLowerCase();
+      if (lowerReply.includes("analyze") || lowerReply.includes("try on") || lowerReply.includes("shade match")) {
+          action = "open_tryon";
+      } else if (lowerReply.includes("routine") || lowerReply.includes("build a complete look")) {
+          action = "open_routine";
+      }
+
+      const { RecommendationGuardrails } = await import("@stylique/beauty-engine");
+      fullReply = RecommendationGuardrails.validateAdvisorOutput(fullReply);
+
+      return NextResponse.json({ reply: fullReply, action, stage: decision.stage });
+    } catch (err) {
+      console.error("Gemini provider error:", err);
+      return NextResponse.json({ reply: "I'm having a little trouble connecting to my AI brain. Could you try again?", action: null, stage: "understand_intent" });
+    }
 
   } catch (error) {
     console.error("[chat] Error:", error);

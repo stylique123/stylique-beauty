@@ -11,18 +11,15 @@ interface ChatInterfaceProps {
 }
 
 const QUICK_REPLIES = [
-  "What foundation shade suits me?",
-  "Build me a morning routine",
-  "Which blush would work for me?",
-  "Compare these products",
+  "Find my foundation shade",
+  "Build a morning routine",
   "What are my undertones?",
+  "Recommend a blush for me"
 ];
 
 export function ChatInterface({ messages, profile, onSendMessage, onBack }: ChatInterfaceProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const isStreaming = messages.length > 0 && messages[messages.length - 1]?.role === "assistant" &&
-    messages[messages.length - 1]?.content === "";
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -43,71 +40,24 @@ export function ChatInterface({ messages, profile, onSendMessage, onBack }: Chat
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 180px)" }}>
-      {/* Header */}
-      <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.5rem" }}>
-        <button className="btn-ghost" onClick={onBack} style={{ padding: "0.5rem" }}>
-          ← Back
-        </button>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          <div style={{
-            width: "44px", height: "44px", borderRadius: "50%",
-            background: "var(--gradient-brand)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            fontSize: "1.25rem",
-            boxShadow: "0 0 20px rgba(139,92,246,0.3)",
-          }}>
-            ✦
-          </div>
-          <div>
-            <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, color: "var(--color-text-primary)" }}>
-              Stella
-            </div>
-            <div style={{ fontSize: "0.75rem", color: "#22c55e", display: "flex", alignItems: "center", gap: "0.3rem" }}>
-              <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#22c55e", display: "inline-block", boxShadow: "0 0 6px #22c55e" }} />
-              AI Beauty Advisor · Online
-            </div>
-          </div>
-        </div>
-        {profile && (
-          <div style={{ marginLeft: "auto", display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-            {profile.skinToneDepth && (
-              <span className="profile-tag">{profile.skinToneDepth}</span>
-            )}
-            {profile.undertone && (
-              <span className="profile-tag">{profile.undertone} undertone</span>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Messages */}
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      {/* Messages Area */}
       <div style={{
         flex: 1,
         overflowY: "auto",
         display: "flex",
         flexDirection: "column",
-        gap: "1rem",
-        paddingRight: "0.25rem",
+        gap: "1.25rem",
+        padding: "0.5rem 0",
       }}>
-        {/* Welcome message if empty */}
-        {messages.length === 0 && (
-          <div className="message-assistant animate-fade-in-up" style={{ maxWidth: "90%" }}>
-            <p>
-              Hi! I&apos;m Stella, your personal AI beauty advisor. ✨
-              {profile
-                ? ` I can see your ${profile.skinToneDepth ?? "skin"} tone profile is ready. `
-                : " "}
-              Ask me anything about products, shades, routines, or comparisons — I&apos;m here to help!
-            </p>
-          </div>
-        )}
-
         {messages.map((msg, i) => (
           <div
             key={msg.id}
             className={msg.role === "user" ? "message-user" : "message-assistant"}
-            style={{ animationDelay: `${i * 30}ms`, animation: "fade-in-up 0.3s ease-out forwards" }}
+            style={{ 
+              animationDelay: `${Math.min(i * 30, 300)}ms`, 
+              animation: "fade-in-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards" 
+            }}
           >
             {msg.role === "assistant" && msg.content === "" ? (
               <div style={{ display: "flex", gap: "4px", alignItems: "center", height: "20px", padding: "0 4px" }}>
@@ -120,34 +70,37 @@ export function ChatInterface({ messages, profile, onSendMessage, onBack }: Chat
             )}
           </div>
         ))}
-        <div ref={messagesEndRef} />
+        <div ref={messagesEndRef} style={{ float:"left", clear: "both" }} />
       </div>
 
-      {/* Quick replies */}
-      {messages.length === 0 && (
-        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginTop: "1rem", marginBottom: "1rem" }}>
+      {/* Quick Replies (Only when empty or 1 message) */}
+      {messages.length <= 1 && (
+        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "1rem", marginTop: "1rem" }}>
           {QUICK_REPLIES.map(reply => (
             <button
               key={reply}
               onClick={() => onSendMessage(reply)}
               style={{
-                padding: "0.45rem 0.875rem",
+                padding: "0.5rem 1rem",
                 borderRadius: "var(--radius-full)",
-                border: "1px solid var(--color-border-default)",
-                background: "var(--color-surface-card)",
+                border: "1px solid var(--color-border-subtle)",
+                background: "rgba(255,255,255,0.03)",
                 color: "var(--color-text-secondary)",
                 fontSize: "0.8125rem",
                 cursor: "pointer",
-                transition: "all 0.15s ease",
+                transition: "all 0.2s ease",
                 fontWeight: 500,
+                backdropFilter: "blur(8px)"
               }}
               onMouseEnter={e => {
-                e.currentTarget.style.borderColor = "rgba(139,92,246,0.4)";
-                e.currentTarget.style.color = "var(--color-violet-300)";
+                e.currentTarget.style.borderColor = "var(--color-violet-500)";
+                e.currentTarget.style.color = "var(--color-text-primary)";
+                e.currentTarget.style.background = "rgba(139,92,246,0.1)";
               }}
               onMouseLeave={e => {
-                e.currentTarget.style.borderColor = "var(--color-border-default)";
+                e.currentTarget.style.borderColor = "var(--color-border-subtle)";
                 e.currentTarget.style.color = "var(--color-text-secondary)";
+                e.currentTarget.style.background = "rgba(255,255,255,0.03)";
               }}
             >
               {reply}
@@ -156,7 +109,7 @@ export function ChatInterface({ messages, profile, onSendMessage, onBack }: Chat
         </div>
       )}
 
-      {/* Input */}
+      {/* Input Box */}
       <div style={{
         display: "flex",
         gap: "0.75rem",
@@ -168,17 +121,25 @@ export function ChatInterface({ messages, profile, onSendMessage, onBack }: Chat
           ref={inputRef}
           className="input-base"
           id="chat-input"
-          placeholder="Ask Stella anything about your beauty profile..."
+          placeholder="Ask Stella..."
           onKeyDown={handleKeyDown}
-          style={{ flex: 1 }}
+          autoComplete="off"
+          style={{ flex: 1, padding: "0.875rem 1.25rem" }}
         />
         <button
           className="btn-primary"
           id="chat-send-btn"
           onClick={handleSend}
-          style={{ padding: "0.75rem 1.25rem", flexShrink: 0 }}
+          style={{ 
+            width: "3rem", height: "3rem", 
+            padding: 0, 
+            display: "flex", alignItems: "center", justifyContent: "center",
+            flexShrink: 0, borderRadius: "50%"
+          }}
         >
-          Send ✦
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
         </button>
       </div>
     </div>

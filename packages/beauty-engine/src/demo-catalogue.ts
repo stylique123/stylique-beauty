@@ -11,7 +11,7 @@ export const DEMO_PRODUCTS: Product[] = [
     brand: 'Stylique',
     price: 42.00,
     currency: 'GBP',
-    imageUrl: null,
+    imageUrl: 'https://images.unsplash.com/photo-1599305090598-fe179d501227?q=80&w=800&auto=format&fit=crop',
     images: [],
     tags: ['buildable', 'long-wear', 'hydrating', 'all-skin-types'],
     shades: [
@@ -44,7 +44,7 @@ export const DEMO_PRODUCTS: Product[] = [
     brand: 'Stylique',
     price: 28.00,
     currency: 'GBP',
-    imageUrl: null,
+    imageUrl: 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?q=80&w=800&auto=format&fit=crop',
     images: [],
     tags: ['powder', 'buildable', 'natural-finish'],
     shades: [
@@ -73,7 +73,7 @@ export const DEMO_PRODUCTS: Product[] = [
     brand: 'Stylique',
     price: 24.00,
     currency: 'GBP',
-    imageUrl: null,
+    imageUrl: 'https://images.unsplash.com/photo-1586495204481-2292f3922c26?q=80&w=800&auto=format&fit=crop',
     images: [],
     tags: ['matte', 'long-wear', 'vitamin-e', 'comfortable'],
     shades: [
@@ -104,7 +104,7 @@ export const DEMO_PRODUCTS: Product[] = [
     brand: 'Stylique',
     price: 32.00,
     currency: 'GBP',
-    imageUrl: null,
+    imageUrl: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&w=800&auto=format&fit=crop',
     images: [],
     tags: ['glow', 'dewy', 'luminous', 'powder'],
     shades: [
@@ -132,7 +132,7 @@ export const DEMO_PRODUCTS: Product[] = [
     brand: 'Stylique',
     price: 26.00,
     currency: 'GBP',
-    imageUrl: null,
+    imageUrl: 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=800&auto=format&fit=crop',
     images: [],
     tags: ['full-coverage', 'long-wear', 'caffeine', 'brightening'],
     shades: [
@@ -162,7 +162,7 @@ export const DEMO_PRODUCTS: Product[] = [
     brand: 'Stylique',
     price: 36.00,
     currency: 'GBP',
-    imageUrl: null,
+    imageUrl: 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?q=80&w=800&auto=format&fit=crop',
     images: [],
     tags: ['pore-minimising', 'long-wear', 'lightweight'],
     shades: [],
@@ -186,7 +186,7 @@ export const DEMO_PRODUCTS: Product[] = [
     brand: 'Stylique',
     price: 30.00,
     currency: 'GBP',
-    imageUrl: null,
+    imageUrl: 'https://images.unsplash.com/photo-1590156546946-ce55a12a6a5d?q=80&w=800&auto=format&fit=crop',
     images: [],
     tags: ['bronzer', 'contour', 'warm', 'buildable'],
     shades: [
@@ -214,7 +214,7 @@ export const DEMO_PRODUCTS: Product[] = [
     brand: 'Stylique',
     price: 54.00,
     currency: 'GBP',
-    imageUrl: null,
+    imageUrl: 'https://images.unsplash.com/photo-1583241495940-2e45f9fb0933?q=80&w=800&auto=format&fit=crop',
     images: [],
     tags: ['palette', 'matte', 'metallic', 'pigmented', 'neutral'],
     shades: [
