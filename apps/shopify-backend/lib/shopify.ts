@@ -1,6 +1,7 @@
 import '@shopify/shopify-api/adapters/web-api';
 import { shopifyApi, ApiVersion, type Shopify } from '@shopify/shopify-api';
-import { MemorySessionStorage } from '@shopify/shopify-app-session-storage-memory';
+import { PrismaSessionStorage } from '@shopify/shopify-app-session-storage-prisma';
+import { prisma } from '@stylique/db';
 
 export const shopify: Shopify = shopifyApi({
   apiKey: process.env.SHOPIFY_API_KEY || 'dummy_api_key',
@@ -10,5 +11,5 @@ export const shopify: Shopify = shopifyApi({
   hostScheme: 'https',
   apiVersion: ApiVersion.January25,
   isEmbeddedApp: true,
-  sessionStorage: new MemorySessionStorage(),
+  sessionStorage: new PrismaSessionStorage(prisma),
 });
