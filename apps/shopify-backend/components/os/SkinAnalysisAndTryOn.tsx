@@ -60,7 +60,7 @@ export function SkinAnalysisAndTryOn() {
   }, [activeDialog]);
 
   const calculateShades = () => {
-    if (!profile.skinToneDepth || !profile.undertone) return;
+    if (!profile.skinToneDepth || !profile.undertone || !product) return;
     const result = ShadeEngine.matchShade(product, profile);
     if (result) {
       setMatchResult(result);
