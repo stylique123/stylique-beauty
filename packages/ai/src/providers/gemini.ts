@@ -280,7 +280,7 @@ ${context.faceAnalysis ? `- Face analysis completed` : '- No face analysis yet'}
 ${context.currentGoal ? `- Current goal: ${context.currentGoal}` : ''}
 
 Available products (You MUST recommend from this exact list): 
-${context.catalogueProducts.map(p => \`- \${p.name} (\${p.category}): \${p.currency}\${p.price}. Highlights: \${p.tags.join(', ')}\`).join('\n')}
+${context.catalogueProducts.map(p => "- " + p.name + " (" + p.category + "): " + p.currency + p.price + ". Highlights: " + p.tags.join(', ')).join('\n')}
 
 CRITICAL: Keep responses punchy (2-4 sentences max). Drive them toward the AR Try-On or Routine Builder immediately if they haven't used it. Example: "Listen, your combination skin needs serious hydration prep before you even think about foundation. I'm building you a 3-step routine right now. Let's get it in your cart."`;
 
