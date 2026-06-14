@@ -59,6 +59,13 @@ export function SkinAnalysisAndTryOn() {
     }
   }, [activeDialog]);
 
+  // Bind the camera stream to the video element once it mounts (when step changes to 'scanning' or 'results')
+  useEffect(() => {
+    if (videoRef.current && streamRef.current && videoRef.current.srcObject !== streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+    }
+  }, [step]);
+
   const calculateShades = () => {
     if (!profile.skinToneDepth || !profile.undertone || !product) return;
     const result = ShadeEngine.matchShade(product, profile);
