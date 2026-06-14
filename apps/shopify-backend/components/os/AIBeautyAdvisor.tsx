@@ -101,9 +101,9 @@ export function AIBeautyAdvisor() {
                 width: "40px", height: "40px", borderRadius: "50%", 
                 background: "var(--gradient-brand)", 
                 display: "flex", alignItems: "center", justifyContent: "center", 
-                fontSize: "1.25rem", boxShadow: "0 0 20px rgba(139,92,246,0.4)"
+                boxShadow: "0 0 20px rgba(139,92,246,0.4)", overflow: "hidden"
               }}>
-                ✦
+                <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200&auto=format&fit=crop" alt="Stella" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               </div>
               <div>
                 <div style={{ fontWeight: 700, fontSize: "1rem", color: "var(--color-text-primary)", fontFamily: "var(--font-display)" }}>Stella</div>
@@ -158,7 +158,7 @@ export function AIBeautyAdvisor() {
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
         ) : (
-          "✦"
+          <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=200&auto=format&fit=crop" alt="Stella" style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }} />
         )}
       </button>
     </div>

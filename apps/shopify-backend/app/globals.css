@@ -246,6 +246,34 @@ body {
   }
 }
 
+/* Fixes for React Server Components (Hover States) */
+.shade-btn {
+  transition: all 0.2s ease;
+}
+.shade-btn:hover {
+  transform: scale(1.1);
+  border-color: var(--color-text-primary) !important;
+}
+
+.accordion-tab {
+  transition: color 0.2s ease;
+}
+.accordion-tab:hover {
+  color: var(--color-violet-400) !important;
+}
+
+/* ---------------------------------
+   UTILITIES
+---------------------------------- */
+.hide-mobile {
+  display: none;
+}
+@media (min-width: 768px) {
+  .hide-mobile {
+    display: block;
+  }
+}
+
 /* Chat Bubbles */
 .message-user {
   max-width: 85%;

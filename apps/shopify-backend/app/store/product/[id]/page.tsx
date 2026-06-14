@@ -106,6 +106,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                     <button
                       key={shade.id}
                       title={shade.name}
+                      className="shade-btn"
                       style={{
                         width: "2.5rem",
                         height: "2.5rem",
@@ -113,16 +114,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                         background: shade.hexColor || '#ccc',
                         border: "2px solid var(--color-border-subtle)",
                         cursor: "pointer",
-                        transition: "all 0.2s ease",
                         padding: 0
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = "scale(1.1)";
-                        e.currentTarget.style.borderColor = "var(--color-text-primary)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = "scale(1)";
-                        e.currentTarget.style.borderColor = "var(--color-border-subtle)";
                       }}
                     />
                   ))}
@@ -158,18 +150,15 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
             {/* Accordions */}
             <div style={{ marginTop: "1rem" }}>
               {['Ingredients', 'How to Use', 'Shipping & Returns'].map((tab) => (
-                <div key={tab} style={{ 
+                <div key={tab} className="accordion-tab" style={{ 
                   padding: "1.5rem 0", 
                   borderTop: "1px solid var(--color-border-subtle)", 
                   display: "flex", 
                   justifyContent: "space-between", 
                   cursor: "pointer", 
                   fontWeight: 500, 
-                  color: "var(--color-text-primary)",
-                  transition: "color 0.2s ease"
+                  color: "var(--color-text-primary)"
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.color = "var(--color-violet-400)"}
-                onMouseLeave={(e) => e.currentTarget.style.color = "var(--color-text-primary)"}
                 >
                   {tab}
                   <span style={{ color: "var(--color-text-muted)" }}>+</span>
