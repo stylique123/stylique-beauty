@@ -13,6 +13,7 @@
   "dependencies": {
     "@google/generative-ai": "^0.24.0",
     "@shopify/shopify-api": "^13.0.0",
+    "@shopify/shopify-app-session-storage-memory": "^6.0.0",
     "@shopify/shopify-app-session-storage-prisma": "^9.0.0",
     "@stylique/ai": "*",
     "@stylique/beauty-engine": "*",
