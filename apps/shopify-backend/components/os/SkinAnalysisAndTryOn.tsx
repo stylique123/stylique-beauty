@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useStyliqueOS } from "./StyliqueOSProvider";
 import { ProductCatalogueEngine, ShadeEngine, CartEngine, LearningEngine } from "@stylique/beauty-engine";
 import { AIShadeSimulator } from "../simulator/AIShadeSimulator";
@@ -12,6 +12,8 @@ export function SkinAnalysisAndTryOn() {
   const [step, setStep] = useState<'camera' | 'scanning' | 'results'>('camera');
   const [activeShadeId, setActiveShadeId] = useState<string | null>(null);
   const [matchResult, setMatchResult] = useState<{ matches: ShadeMatch[], bestMatch: ShadeMatch | null, reasoning: string } | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
     if (activeDialog === 'try_on' && step === 'camera') {
@@ -27,15 +29,35 @@ export function SkinAnalysisAndTryOn() {
 
   if (activeDialog !== 'try_on' || !product) return null;
 
-  const handleScan = () => {
-    setStep('scanning');
-    setTimeout(() => {
-      // Mock scan results
-      updateProfile({ skinToneDepth: 'medium', undertone: 'warm' });
-      setStep('results');
-      calculateShades();
-    }, 2500);
+  const handleScan = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+      setStep('scanning');
+      setTimeout(() => {
+        // Mock scan results
+        updateProfile({ skinToneDepth: 'medium', undertone: 'warm' });
+        setStep('results');
+        calculateShades();
+      }, 3500);
+    } catch (err) {
+      console.error("Camera access denied or failed:", err);
+      alert("Please allow camera access to use the AR Try-On.");
+    }
   };
+
+  // Cleanup camera when closing
+  useEffect(() => {
+    if (activeDialog !== 'try_on') {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current = null;
+      }
+    }
+  }, [activeDialog]);
 
   const calculateShades = () => {
     if (!profile.skinToneDepth || !profile.undertone) return;
@@ -92,8 +114,27 @@ export function SkinAnalysisAndTryOn() {
           boxShadow: "0 24px 48px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(255,255,255,0.05)"
         }}>
           
+          {/* Camera Feed Background */}
+          {(step === 'scanning' || step === 'results') && (
+            <video 
+              ref={videoRef}
+              autoPlay 
+              playsInline 
+              muted
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                transform: "scaleX(-1)", // Mirror effect
+                zIndex: 0
+              }}
+            />
+          )}
+
           {step === 'camera' && (
-            <div className="animate-fade-in" style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "2rem" }}>
+            <div className="animate-fade-in" style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "2rem", zIndex: 1 }}>
               <div style={{ 
                 width: "240px", height: "320px", 
                 border: "2px dashed rgba(255,255,255,0.3)", 
@@ -109,28 +150,28 @@ export function SkinAnalysisAndTryOn() {
           )}
 
           {step === 'scanning' && (
-            <div className="animate-fade-in" style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div className="animate-fade-in" style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)", zIndex: 1 }}>
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1.5rem", color: "var(--color-text-primary)" }}>
                 <div className="animate-spin-slow" style={{ width: "64px", height: "64px", borderRadius: "50%", border: "4px solid rgba(139,92,246,0.3)", borderTopColor: "var(--color-violet-500)" }} />
                 <div style={{ textAlign: "center" }}>
-                  <h3 className="text-heading-3" style={{ marginBottom: "0.5rem" }}>Scanning Profile</h3>
-                  <p style={{ color: "var(--color-text-secondary)", fontSize: "0.9375rem" }}>Analyzing depth and undertones...</p>
+                  <h3 className="text-heading-3" style={{ marginBottom: "0.5rem", textShadow: "0 2px 4px rgba(0,0,0,0.5)" }}>Scanning Profile</h3>
+                  <p style={{ color: "rgba(255,255,255,0.8)", fontSize: "0.9375rem", textShadow: "0 1px 2px rgba(0,0,0,0.5)" }}>Analyzing depth and undertones...</p>
                 </div>
               </div>
             </div>
           )}
 
           {step === 'results' && activeShade && profile.skinToneDepth && profile.undertone && (
-            <div className="animate-fade-in" style={{ position: "absolute", inset: 0, padding: "1rem", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <div className="animate-fade-in" style={{ position: "absolute", inset: 0, padding: "1rem", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1 }}>
                <AIShadeSimulator 
                  skinDepth={profile.skinToneDepth}
                  undertone={profile.undertone}
                  productCategory={product.category}
                  productColor={activeShade.hexColor}
-                 opacity={1}
+                 opacity={0.85} // Make sure it's slightly transparent over the camera
                />
                
-               {/* Before/After Toggle Overlay (Mock) */}
+               {/* Before/After Toggle Overlay */}
                <div style={{ 
                  position: "absolute", bottom: "1.5rem", left: "1.5rem", 
                  background: "rgba(9, 9, 11, 0.6)", padding: "0.5rem 1rem", 
